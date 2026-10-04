@@ -1,0 +1,6 @@
+__pycache__/
+*.py[cod]
+# Machine-specific task IDs, runtime evidence, and the original desktop capture.
+verification.json
+activity-verification.json
+preview.png
