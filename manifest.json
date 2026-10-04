@@ -2,9 +2,9 @@
   "schemaVersion": 1,
   "id": "onnwee.spool",
   "name": "Spool",
-  "version": "0.2.0",
+  "version": "0.7.0",
   "author": "onnwee",
-  "description": "A Subcult cassette companion that follows desktop chat and task activity.",
+  "description": "A Subcult cassette companion that follows T3 Code sessions and desktop chat activity.",
   "kinds": [
     "service"
   ],

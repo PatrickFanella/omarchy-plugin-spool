@@ -1,32 +1,76 @@
 # Spool for Omarchy
 
-![Spool following desktop activity](activity-preview.png)
+![Spool activity tray](docs/preview.png)
 
-Spool is a violet cassette companion with acid-green limbs, animated eyes, and a small desktop control menu. This Quickshell service plugin uses the original Subcult pet artwork.
+Spool is a violet cassette companion for your Linux desktop. It follows local T3 Code sessions and can also follow Codex desktop and ChatGPT activity through the Codex desktop app. Its activity cards show progress, threads needing attention, and recent completions.
 
-Requires Omarchy with the Quickshell plugin API, Quickshell 0.3.1 or compatible, and Hyprland. Developed and run on Omarchy with Hyprland 0.56.2.
+## Requirements
 
-## Install
+- Omarchy with the Quickshell plugin API, Quickshell 0.3.1 or compatible, and Hyprland.
+- Python 3.11 or later; no third-party Python runtime dependencies.
+- T3 Code for T3 activity, or a running Codex desktop app with its local task-tool endpoint for desktop activity.
 
-Run `./install.sh` from this directory in a Codex chat terminal. It copies the plugin into `~/.config/omarchy/plugins/onnwee.spool`, rescans plugins, and enables it. When run from Codex, the installer records that chat as the local adapter context and enables automatic activity tracking. Existing Spool files are backed up first. The script also backs up `shell.json`; settings are changed through Omarchy's plugin API.
+Developed on Omarchy with Hyprland 0.56.2. Both activity sources are compatibility adapters to local app interfaces; app updates may require adapter changes. The desktop adapter is experimental and currently has an unresolved live endpoint timeout on the development host. T3 activity works independently.
 
-If an update leaves the old code loaded or reports `Spool activity configuration failed`, run `./install.sh --restart-shell`. This restarts only the Omarchy shell through its existing launcher. Quickshell can retain plugin components after a registry rescan; the installer uses a component filename derived from the code hash so the updated service has a distinct identity.
+## Install or update
 
-The enabled service starts with the existing Omarchy shell. No additional Hyprland autostart entry is needed.
+Extract the release archive and run:
 
-## Controls
+```sh
+./install.sh
+```
 
-- Left-click Spool to jump; hold and drag to move him.
-- Middle-click to wave.
-- Right-click to open or close the menu.
-- The menu controls size, pointer-following eyes, wandering, reduced motion, monitor selection, automatic chat activity, and visibility.
-- Size cycles from 64 to 192 pixels in the menu; IPC accepts 64 to 256 pixels.
+The installer backs up the existing plugin and `shell.json`, installs into `~/.config/omarchy/plugins/onnwee.spool`, and enables the service through Omarchy. It preserves existing preferences, including disabled activity tracking. If `CODEX_THREAD_ID` is present, it records that thread as the desktop adapter context. T3 tracking does not require running the installer from a Codex chat.
 
-Spool starts in the bottom-right corner. Only his rectangular sprite area and open menu accept pointer input. The layer never requests keyboard focus or reserves screen space. Fullscreen workspaces hide him by default. Wandering is off by default.
+The pet starts with the existing Omarchy shell; no extra autostart entry is needed. Content-versioned QML and JavaScript imports prevent loading older plugin code. If the shell still retains a previous component, use `./install.sh --restart-shell`. That restarts the Omarchy shell and its plugins.
 
-Settings are stored on Spool's entry in `~/.config/omarchy/shell.json`, with a local recovery copy in `~/.local/state/spool/preferences.json`. Omarchy removes a service entry when disabling it; the recovery copy restores Spool's preferences when he is re-enabled. Pointer tracking queries `hyprctl -j cursorpos` at most four times per second while Spool is visible, idle, and tracking is enabled. Hidden, reduced-motion, menu, and dragging states pause polling.
+Backups are kept under `~/.local/state/spool/install-*`. To roll back, disable Spool, restore the plugin files from the chosen backup, rescan plugins, and re-enable it. Restore the backed-up `shell.json` only if you also intend to restore all shell settings from that point.
 
-## Commands and integrations
+## Pet controls
+
+- **Left-click:** bring the selected thread's app forward. With no selected activity, jump. Hold and drag to move the pet.
+- **Middle-click:** wave.
+- **Right-click:** open the menu for size, eyes, wandering, monitor, activity source, quiet controls, mini mode, and visibility.
+
+The pet starts at the bottom right and hides on fullscreen workspaces by default. Only the sprite, activity bubble, and open menu accept pointer input. The transparent overlay reserves no screen space and requests no keyboard focus. Wandering is off by default.
+
+Preferences live in Spool's entry in `~/.config/omarchy/shell.json`, with a recovery copy in `~/.local/state/spool/preferences.json`. This copy restores preferences after disabling and re-enabling the service.
+
+## Activity views
+
+The **full tray** is a scrollable stack. The newest progress comment brings its thread first. **Pin** keeps a chosen thread first across updates; **Unpin** restores recency ordering. Pins survive shell restarts and remain dormant while their thread has no activity.
+
+The chevron switches between the full tray and a **single-card view**. Arrows cycle threads; scrolling over a compact card's title also cycles them. Each progress viewport shows at most five lines, with up to 6,000 characters available by scrolling over its text. Scroll over titles or status lines to move through the expanded tray.
+
+**Mini mode** is a single 38-pixel-high line with the provider logo, status, count, and thread title. Use **−** in the tray header or **Mini mode** in the right-click menu to enter it. Its **⌃** button opens the full tray. Scrolling cycles threads; clicking the text brings the selected app forward. Mini mode survives restarts.
+
+The amber **!** count indicates unsnoozed threads needing input or blocked by failure. Click it to select one. It stays visible even when another thread is pinned. The pet animation reflects input requests first, then failure, unread completions, and running tasks; card order follows progress recency.
+
+Cards show elapsed run time and last-update age. Hover over a provider logo or timing line for app, provider, and model details when available. If the desktop source supplies no start time, elapsed time starts when Spool observes the run. Known providers have logos; custom providers fall back to their initial.
+
+## History, completions, and quiet controls
+
+- **History:** the last five observed progress comments from the current run, oldest first. Streaming extensions update the same comment. Entries show up to 2,000 characters each in the five-line viewport. **Latest** returns to the current update. New runs clear the thread's history. Comments arriving entirely between polls can be missed.
+- **Recent:** the five most recent observed completions, including visited T3 sessions, with finish ages and assistant previews. **Dismiss** hides one completion; a later completion from that thread can appear again. Sources repopulate this in-memory list after restart.
+- **Snooze:** hide a thread for **15m**, **1h**, or **Until next run**. Snoozed threads are excluded from the attention count. **Snoozed** reveals hidden cards with **Resume** actions; **Resume all** also clears snoozes for absent threads. Next-run snoozes depend on a source run ID or an observed transition into a new run.
+- **Pet motion:** pause movement and animation while keeping activity cards and timing updates active.
+- **Needs attention:** filter the tray to requests for input and failures.
+
+Pins, snoozes, dismissed completion identities, and view preferences are saved. Progress text, histories, titles, and completion previews remain in memory and are not saved in preferences.
+
+## Sources and limits
+
+**T3 Code** is the default source. The bridge reads `~/.t3/userdata/statev2.sqlite` in read-only transactions and checks the PID recorded in `server-runtime.json`. It follows the latest run of visible top-level sessions across providers. Queued and starting runs count as working. Archived, deleted, cancelled, and child subagent sessions are excluded.
+
+T3 progress comes from assistant updates and recognized Codex public reasoning summaries. Raw reasoning, prompts, and command outputs are excluded. Unknown reasoning formats are skipped. Clicking a T3 card brings the existing desktop window forward and leaves its current thread selected. Exact thread navigation and browser pairing are not used; a closed T3 window is not relaunched.
+
+**Desktop chats** follows Codex tasks and ChatGPT chats exposed by the Codex desktop app. It reads the 50 recent chats plus pinned chats, then at most eight detailed records per poll, prioritizing active and unread tasks. It uses only assistant updates, public reasoning summaries, and bounded completion previews. Native ChatGPT thinking captions are not always available. Clicking opens the selected desktop conversation through its local tool endpoint.
+
+**Both** combines the sources. A failed source clears its active cards while the other continues. Recent completions remain until displaced or dismissed. Polls normally run every five seconds; desktop work has an eight-second sample budget. A slow detail read preserves an already-fetched status list. A 45-second watchdog clears stale active status.
+
+Standalone CLI/IDE sessions, ChatGPT browser tabs, and remote T3 environments are not connected. The bridge sends no messages and approves no actions. There is no separate daemon or browser extension; it runs under the enabled plugin and stops when the plugin is disabled.
+
+## Commands
 
 ```sh
 omarchy-shell spool status
@@ -34,55 +78,41 @@ omarchy-shell spool show
 omarchy-shell spool hide
 omarchy-shell spool toggle
 omarchy-shell spool menu
+omarchy-shell spool mini
+omarchy-shell spool activityTray
+omarchy-shell spool cycleTask 1
+omarchy-shell spool pinTask
+omarchy-shell spool history
+omarchy-shell spool snooze 15m
+omarchy-shell spool snooze next
+omarchy-shell spool resumeSnoozed
+omarchy-shell spool dismissRecent
 omarchy-shell spool animate waving
-omarchy-shell spool animate jumping
-omarchy-shell spool animate running
-omarchy-shell spool animate waiting
-omarchy-shell spool animate review
-omarchy-shell spool animate failed
-omarchy-shell spool animate idle
-omarchy-shell spool configure '{"size":160,"monitor":"DP-1","right":32,"bottom":32}'
-omarchy-shell spool configure '{"followPointer":false,"wander":true}'
-```
-
-## Automatic desktop activity
-
-Spool follows ChatGPT chats and Codex tasks visible to this desktop app. The local `bridge.py` process polls the app's read-only task tools about every five seconds. It reads the 50 recent chats plus pinned chats, and obtains detailed status for up to eight active or unread chats to detect requests for input or approval.
-
-- Working tasks play the cassette-work animation.
-- Requests for input or approval play the waiting animation.
-- Task failures play the failure animation.
-- Completed unread chats play the review animation.
-- A running task that becomes idle and already read gets a brief wave.
-
-When several tasks have activity, waiting takes priority, then failure, working, and review. The badge counts all tasks with activity; clicking it opens the first task in that order in the desktop app. Spool resumes the task animation after a manual jump or wave.
-
-The adapter uses the installed desktop app's local tool socket. It sends no messages, approves no actions, and stores no conversation text, credentials, or copied authentication state. Task IDs and activity counts remain in the pet's running process. The originating chat ID is saved in Spool's settings as adapter context. The adapter requests zero output characters, but the app may still return metadata and short turn summaries internally; these are discarded.
-
-Tracking can be turned off with the menu's **Chat activity** control or:
-
-```sh
+omarchy-shell spool configure '{"activitySource":"all"}'
+omarchy-shell spool configure '{"pausePet":true,"onlyAttention":true}'
+omarchy-shell spool configure '{"miniMode":true,"size":128,"right":24,"bottom":24}'
 omarchy-shell spool configure '{"autoActivity":false}'
 ```
 
-The bridge rediscovers the desktop app after a restart. An unavailable connection clears the activity state instead of reporting completion. A 45-second watchdog clears a stale state. There is no separate daemon or browser extension; the bridge runs under the enabled Omarchy plugin and stops when it is disabled.
+Activity sources are `t3`, `desktop`, and `all`. Menu size cycles between 64 and 192 pixels; IPC accepts 64 to 256. `status` includes thread IDs, titles, and progress text, so treat its output as conversation data.
 
-This is a local compatibility adapter to an internal desktop interface, not an official Pets event API. App updates may require an adapter update. Standalone ChatGPT browser tabs are not connected. Voice mode, the native pet's quick-chat composer, and exact notification ordering are not reproduced.
+Disable with `omarchy plugin disable onnwee.spool`; re-enable with `omarchy plugin enable onnwee.spool`. To remove, disable first, then remove only `~/.config/omarchy/plugins/onnwee.spool`. Backups and preferences are retained separately.
 
-When automatic tracking is off, `running`, `waiting`, and `review` loop until another state is selected. Jumping, waving, failure, and directional walks return to idle after one cycle. These commands can also be used by custom task hooks.
+## Development and releases
 
-Disable with `omarchy plugin disable onnwee.spool`; re-enable with `omarchy plugin enable onnwee.spool`. To remove, disable first, then remove only `~/.config/omarchy/plugins/onnwee.spool`. Installation backups live in `~/.local/state/spool/`.
+```sh
+make check
+make dist
+```
 
-## Development and verification
+Checks require Node.js, `qmllint`, and ShellCheck in addition to Python. Ruff checks run when a working Ruff installation is available. The tests cover adapters, framed transport, task ordering, history, snoozes, and installation in isolated XDG directories. `make dist` builds an allowlisted, reproducible archive and SHA-256 checksum under `dist/`.
 
-Edit the source `Service.qml`, then run `./install.sh` to update the installed copy. To preview without Omarchy, disable the installed plugin and run `quickshell -p .`; stop that preview before re-enabling the plugin to avoid two companions.
+`Service.qml` owns the UI and lifecycle. `TaskQueue.js` owns ordering and selection. `ActivityStore.js` owns bounded history, recent completions, snoozes, and run normalization. `bridge.py` owns both local activity adapters. `install.sh` installs versioned components and retains backups.
 
-Local `activity-verification.json` records the desktop bridge checks. Runtime evidence contains machine-specific task IDs and is excluded from Git. Run `python3 -m unittest -v test_bridge.py` to check concurrent task selection, approval/input flags, completions, and framed socket handling. `activity-preview.png` shows a live activity badge.
+For a standalone preview, disable the installed plugin and run `quickshell -p .`; stop the preview before re-enabling the service. `shell.qml` uses `ShellRoot` so the preview creates no blank floating window. Release checks and remaining qualification limits are in [docs/RELEASE.md](docs/RELEASE.md).
 
-`verification.json` records the original live checks of image loading, animation progress, jump completion, visibility, monitor switching, persistence, disable/re-enable, and preservation of other shell settings. `preview.png` is a cropped live preview. Pointer dragging, menu clicks, and fullscreen transitions still require a hands-on desktop check.
+## License and artwork
 
-## Artwork
+Code and original Spool artwork are licensed under **AGPL-3.0-only**; see [LICENSE](LICENSE). Bundled provider icons retain their MIT license; see [NOTICE.md](NOTICE.md) and `assets/providers/LICENSE`.
 
-`assets/spool.png` is the unchanged transparent 1536 × 2288 sprite atlas from the custom Spool pet created on 2026-10-04. Cells are 192 × 208, with eight columns and eleven rows. SHA-256: `500473e396cebfbbe7481b7f63026872149b9dc0e0e0bb89e000d3758b5cb6ee`.
-
-The artwork is user-specific. No redistribution license is assigned by this package.
+The original transparent sprite atlas is 1536 × 2288, with 192 × 208 cells, eight columns, and eleven rows. Its SHA-256 is `500473e396cebfbbe7481b7f63026872149b9dc0e0e0bb89e000d3758b5cb6ee`.
