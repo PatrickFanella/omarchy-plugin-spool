@@ -1,6 +1,6 @@
 # Spool 0.7.0 release preparation
 
-This is a local release candidate. Publishing, a release tag, and hosted CI have not been performed. No remote is configured in this checkout.
+This is the 0.7.0 release candidate. Gitea is the source repository; GitHub is the public distribution mirror. No release tag or hosted CI result is claimed. The marketplace submission draft is in `docs/MARKETPLACE-SUBMISSION.md`.
 
 ## Reproduce the checks
 
@@ -19,9 +19,22 @@ Extract the archive into a clean directory and run `make check` there before dis
 
 ## Remaining qualification
 
-- The Codex/ChatGPT desktop endpoint on this host currently times out. Mock transport tests pass; live desktop reconnection and event delivery are not release-qualified.
+- After a scoped desktop relaunch, live Codex session listing and Spool reconnection passed. A new native Codex turn and its progress/completion delivery are not release-qualified.
 - A fresh install on another supported Omarchy host has not been checked.
 - Pointer dragging, every menu action, and fullscreen transitions have not received a complete hands-on release pass.
 - Provider status support is neutral through T3, but public progress availability varies by provider. There is no claim of live testing every provider.
 
 The code and original artwork are AGPL-3.0-only. The bundled provider icons retain their separate MIT license. See `NOTICE.md` for attribution.
+
+## Publishing the mirror
+
+Publish the reviewed release commit to Gitea first. Then push that same commit to GitHub's `main` branch without force. Verify both remote SHAs before a marketplace submission. GitHub is a distribution copy; make future source changes in Gitea. No recurring mirror job is installed by this repository.
+
+```sh
+git push origin HEAD:main
+git push github HEAD:main
+git ls-remote origin refs/heads/main
+git ls-remote github refs/heads/main
+```
+
+The marketplace installs the public repository's current default branch. Keep `manifest.json`, README, license, and preview in the repository root. The submission draft uses the marketplace's required headings and checklist; the owner must confirm it before the issue is opened.

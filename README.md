@@ -1,6 +1,6 @@
 # Spool for Omarchy
 
-![Spool activity tray](docs/preview.png)
+![Spool activity tray](preview.png)
 
 Spool is a violet cassette companion for your Linux desktop. It follows local T3 Code sessions and can also follow Codex desktop and ChatGPT activity through the Codex desktop app. Its activity cards show progress, threads needing attention, and recent completions.
 
@@ -10,11 +10,19 @@ Spool is a violet cassette companion for your Linux desktop. It follows local T3
 - Python 3.11 or later; no third-party Python runtime dependencies.
 - T3 Code for T3 activity, or a running Codex desktop app with its local task-tool endpoint for desktop activity.
 
-Developed on Omarchy with Hyprland 0.56.2. Both activity sources are compatibility adapters to local app interfaces; app updates may require adapter changes. The desktop adapter is experimental and currently has an unresolved live endpoint timeout on the development host. T3 activity works independently.
+Developed on Omarchy with Hyprland 0.56.2. Both activity sources are compatibility adapters to local app interfaces; app updates may require adapter changes. The desktop adapter is experimental. Session listing and reconnection have been checked on the development host; a new native Codex turn and full event delivery still need qualification. T3 activity works independently.
 
 ## Install or update
 
-Extract the release archive and run:
+Install from the public GitHub mirror with Omarchy:
+
+```sh
+omarchy plugin add https://github.com/PatrickFanella/omarchy-plugin-spool.git --enable
+```
+
+This clones the plugin and enables it after Omarchy confirms the operation. Python, T3 Code, and Codex desktop are separate dependencies; Spool does not install them. For updates, use `omarchy plugin update onnwee.spool`.
+
+Alternatively, extract the source archive or clone the repository and run:
 
 ```sh
 ./install.sh
@@ -96,7 +104,9 @@ omarchy-shell spool configure '{"autoActivity":false}'
 
 Activity sources are `t3`, `desktop`, and `all`. Menu size cycles between 64 and 192 pixels; IPC accepts 64 to 256. `status` includes thread IDs, titles, and progress text, so treat its output as conversation data.
 
-Disable with `omarchy plugin disable onnwee.spool`; re-enable with `omarchy plugin enable onnwee.spool`. To remove, disable first, then remove only `~/.config/omarchy/plugins/onnwee.spool`. Backups and preferences are retained separately.
+Disable with `omarchy plugin disable onnwee.spool`; re-enable with `omarchy plugin enable onnwee.spool`. To remove an Omarchy-managed installation, run `omarchy plugin remove onnwee.spool`. For a manual installation, disable first, then remove only `~/.config/omarchy/plugins/onnwee.spool`. Backups and preferences are retained separately.
+
+The source repository is [Gitea](https://git.subcult.tv/subculture-collective/omarchy-plugin-spool). [GitHub](https://github.com/PatrickFanella/omarchy-plugin-spool) is the public distribution mirror used for marketplace submission.
 
 ## Development and releases
 

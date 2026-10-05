@@ -3,7 +3,6 @@ __pycache__/
 # Machine-specific task IDs, runtime evidence, and the original desktop capture.
 verification.json
 activity-verification.json
-/preview.png
 
 # Generated release artifacts and local tooling caches.
 dist/

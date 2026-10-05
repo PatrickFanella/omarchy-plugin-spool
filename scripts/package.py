@@ -32,6 +32,8 @@ FILES = [
     "scripts/check.sh",
     "scripts/package.py",
     "docs/RELEASE.md",
+    "docs/MARKETPLACE-SUBMISSION.md",
+    "preview.png",
     "docs/preview.png",
     "assets/spool.png",
     "assets/providers/LICENSE",
