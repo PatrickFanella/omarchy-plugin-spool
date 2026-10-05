@@ -1,5 +1,14 @@
 # Spool for Omarchy
 
+<a href="https://subcult.tv">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/brand/subcult-dark.svg">
+    <img src="docs/brand/subcult-light.svg" alt="SUBCULT" width="400">
+  </picture>
+</a>
+
+[SUBCULT](https://subcult.tv) · [Support on Patreon](https://patreon.com/subcult)
+
 ![Spool activity tray](preview.png)
 
 Spool is a violet cassette companion for your Linux desktop. It follows local T3 Code sessions and can also follow Codex desktop and ChatGPT activity through the Codex desktop app. Its activity cards show progress, threads needing attention, and recent completions.
@@ -126,3 +135,12 @@ For a standalone preview, disable the installed plugin and run `quickshell -p .`
 Code and original Spool artwork are licensed under **AGPL-3.0-only**; see [LICENSE](LICENSE). Bundled provider icons retain their MIT license; see [NOTICE.md](NOTICE.md) and `assets/providers/LICENSE`.
 
 The original transparent sprite atlas is 1536 × 2288, with 192 × 208 cells, eight columns, and eleven rows. Its SHA-256 is `500473e396cebfbbe7481b7f63026872149b9dc0e0e0bb89e000d3758b5cb6ee`.
+
+## About SUBCULT and support
+
+Made by [Patrick Fanella](https://patrickfanella.co) as part of
+[SUBCULT](https://subcult.tv). Explore the tools and projects at
+**[subcult.tv](https://subcult.tv)**.
+
+If this plugin is useful to you, **[support SUBCULT on Patreon](https://patreon.com/subcult)**
+to help fund its development and the wider project.
