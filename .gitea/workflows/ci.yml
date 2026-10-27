@@ -17,10 +17,8 @@ jobs:
       with:
         python-version: '3.13'
       env:
-        AGENT_TOOLSDIRECTORY: ${{ runner.temp }}/python-tools-${{ github.run_id }}-${{ github.run_attempt }}-${{
-          github.job }}
-        RUNNER_TOOL_CACHE: ${{ runner.temp }}/python-tools-${{ github.run_id }}-${{ github.run_attempt }}-${{ github.job
-          }}
+        AGENT_TOOLSDIRECTORY: ${{ runner.temp }}/python-tools-${{ github.run_id }}-${{ github.run_attempt }}-${{ github.job }}
+        RUNNER_TOOL_CACHE: ${{ runner.temp }}/python-tools-${{ github.run_id }}-${{ github.run_attempt }}-${{ github.job }}
     - uses: actions/setup-node@v6
       with:
         node-version: '24'
@@ -39,3 +37,46 @@ jobs:
         shellcheck install.sh scripts/check.sh
         ruff check .
         ruff format --check .
+  full:
+    name: Full quality
+    runs-on: ubuntu-latest
+    container:
+      image: archlinux:base@sha256:e82623936fa1a69700b48e98b058df6eaab18b737c27473a7234a40fdecb9413
+    timeout-minutes: 30
+    steps:
+    - name: Install coherent Arch quality toolchain
+      shell: bash
+      run: |-
+        set -euo pipefail
+        pacman -Syu --noconfirm --needed quickshell qt6-declarative shellcheck nodejs python ruff make git
+    - name: Checkout exact PR head
+      uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      with:
+        persist-credentials: false
+        ref: ${{ github.event.pull_request.head.sha || github.sha }}
+    - name: Require real QML modules and run full checks
+      shell: bash
+      run: |-
+        set -euo pipefail
+        export PATH="/usr/lib/qt6/bin:$PATH"
+        export QML_IMPORT_PATH=/usr/lib/qt6/qml
+        export QT_QPA_PLATFORM=offscreen
+        export PYTHONDONTWRITEBYTECODE=1
+        export RUFF_CACHE_DIR=/tmp/spool-ruff-cache
+        for tool in python3 node qmllint shellcheck ruff make; do command -v "$tool"; done
+        ruff --version
+        qmllint --version
+        node --version
+        python3 --version
+        pacman -Q quickshell qt6-base qt6-declarative shellcheck nodejs python ruff make
+        for metadata in \
+          Quickshell/qmldir Quickshell/quickshell-core.qmltypes \
+          Quickshell/_Window/qmldir Quickshell/_Window/quickshell-window.qmltypes \
+          Quickshell/Hyprland/qmldir Quickshell/Hyprland/quickshell-hyprland.qmltypes \
+          Quickshell/Hyprland/_Ipc/quickshell-hyprland-ipc.qmltypes \
+          Quickshell/Io/qmldir Quickshell/Io/quickshell-io.qmltypes Quickshell/Io/FileView.qml \
+          Quickshell/Wayland/qmldir Quickshell/Wayland/quickshell-wayland.qmltypes \
+          Quickshell/Wayland/_WlrLayerShell/quickshell-wayland-layershell.qmltypes; do
+          test -s "/usr/lib/qt6/qml/$metadata"
+        done
+        make check
