@@ -1,0 +1,41 @@
+name: CI
+'on':
+  pull_request: {}
+  push:
+    branches:
+    - main
+permissions:
+  contents: read
+jobs:
+  portable:
+    name: Portable quality
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+    - uses: actions/checkout@v6
+    - uses: actions/setup-python@v6
+      with:
+        python-version: '3.13'
+      env:
+        AGENT_TOOLSDIRECTORY: ${{ runner.temp }}/python-tools-${{ github.run_id }}-${{ github.run_attempt }}-${{
+          github.job }}
+        RUNNER_TOOL_CACHE: ${{ runner.temp }}/python-tools-${{ github.run_id }}-${{ github.run_attempt }}-${{ github.job
+          }}
+    - uses: actions/setup-node@v6
+      with:
+        node-version: '24'
+    - name: Install portable lint tools
+      shell: bash
+      run: |-
+        python3 -m pip install ruff==0.17.3
+        sudo apt-get update
+        sudo apt-get install -y shellcheck
+    - name: Run existing portable tests and lint
+      shell: bash
+      run: |-
+        python3 -m unittest -v test_bridge.py test_t3.py test_install.py
+        node test_queue.cjs
+        node test_activity.cjs
+        shellcheck install.sh scripts/check.sh
+        ruff check .
+        ruff format --check .
