@@ -1,11 +1,9 @@
 # Spool for Omarchy
 
-<a href="https://subcult.tv">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="docs/brand/subcult-dark.svg">
-    <img src="docs/brand/subcult-light.svg" alt="SUBCULT" width="400">
-  </picture>
-</a>
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/brand/lockup.svg">
+  <img src="docs/brand/mark-mono-light.svg" alt="Spool logo. A cassette outline: a rounded rectangle with two reel circles joined by a tape window, and one green eye-dot in the left reel." height="80">
+</picture>
 
 [SUBCULT](https://subcult.tv) · [Support on Patreon](https://patreon.com/subcult)
 
@@ -137,6 +135,13 @@ Code and original Spool artwork are licensed under **AGPL-3.0-only**; see [LICEN
 The original transparent sprite atlas is 1536 × 2288, with 192 × 208 cells, eight columns, and eleven rows. Its SHA-256 is `500473e396cebfbbe7481b7f63026872149b9dc0e0e0bb89e000d3758b5cb6ee`.
 
 ## About SUBCULT and support
+
+<a href="https://subcult.tv">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/brand/subcult-dark.svg">
+    <img src="docs/brand/subcult-light.svg" alt="SUBCULT" width="240">
+  </picture>
+</a>
 
 Made by [Patrick Fanella](https://patrickfanella.co) as part of
 [SUBCULT](https://subcult.tv). Explore the tools and projects at
