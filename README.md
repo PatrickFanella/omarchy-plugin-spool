@@ -7,39 +7,58 @@
 
 [SUBCULT](https://subcult.tv) · [Support on Patreon](https://patreon.com/subcult)
 
+Spool is a violet cassette that lives in the corner of an [Omarchy](https://github.com/basecamp/omarchy) desktop and keeps an eye on your coding-assistant sessions. It watches local [T3 Code](https://github.com/pingdotgg/t3code) sessions, and optionally Codex tasks and ChatGPT chats from the Codex desktop app, and shows their progress, the ones waiting on you, and what just finished. It is for people who run those apps on Omarchy and want to see their state without switching windows.
+
+Version 0.7.0 is a release candidate. Both activity sources read local app interfaces that are not public APIs, so an app update can break them. The T3 Code source is the default and the better tested one; the desktop app source is experimental, and delivery of progress and completions from a new desktop task has not been fully tested.
+
 ![Spool activity tray](preview.png)
 
-Spool is a violet cassette companion for your Linux desktop. It follows local T3 Code sessions and can also follow Codex desktop and ChatGPT activity through the Codex desktop app. Its activity cards show progress, threads needing attention, and recent completions.
+The preview uses synthetic thread data.
 
-## Requirements
+## Features
+
+- An animated cassette pet with drag, jump and wave, optional wandering and eyes that follow the pointer. It hides on fullscreen workspaces by default and takes no keyboard focus or screen space.
+- An activity tray with one card per thread: progress text, elapsed run time, last-update age and the provider's logo.
+- A full tray, a single-card view and a one-line mini mode.
+- An attention count for threads waiting for input or blocked by a failure, and a filter that shows only those.
+- Pins, per-run progress history, a list of recent completions, and snoozes for 15 minutes, an hour or until the next run.
+- Clicking a card brings the matching app window forward.
+- An IPC command set for every control.
+- Read-only: Spool sends no messages to the apps and approves nothing.
+
+## Quick start
+
+### Requirements
 
 - Omarchy with the Quickshell plugin API, Quickshell 0.3.1 or compatible, and Hyprland.
-- Python 3.11 or later; no third-party Python runtime dependencies.
-- T3 Code for T3 activity, or a running Codex desktop app with its local task-tool endpoint for desktop activity.
+- Python 3.11 or later. There are no third-party Python dependencies.
+- T3 Code for T3 activity, or a running Codex desktop app with its local task-tool endpoint for desktop activity. Spool does not install either.
 
-Developed on Omarchy with Hyprland 0.56.2. Both activity sources are compatibility adapters to local app interfaces; app updates may require adapter changes. The desktop adapter is experimental. Session listing and reconnection have been checked on the development host; a new native Codex turn and full event delivery still need qualification. T3 activity works independently.
+### Install
 
-## Install or update
-
-Install from the public GitHub mirror with Omarchy:
+Install with Omarchy:
 
 ```sh
-omarchy plugin add https://github.com/PatrickFanella/omarchy-plugin-spool.git --enable
+omarchy plugin add https://github.com/subculture-collective/omarchy-plugin-spool.git --enable
 ```
 
-This clones the plugin and enables it after Omarchy confirms the operation. Python, T3 Code, and Codex desktop are separate dependencies; Spool does not install them. For updates, use `omarchy plugin update onnwee.spool`.
+Update with `omarchy plugin update onnwee.spool`.
 
-Alternatively, extract the source archive or clone the repository and run:
+Or clone the repository (or extract a source archive) and run:
 
 ```sh
 ./install.sh
 ```
 
-The installer backs up the existing plugin and `shell.json`, installs into `~/.config/omarchy/plugins/onnwee.spool`, and enables the service through Omarchy. It preserves existing preferences, including disabled activity tracking. If `CODEX_THREAD_ID` is present, it records that thread as the desktop adapter context. T3 tracking does not require running the installer from a Codex chat.
+The installer backs up the existing plugin and `shell.json`, installs into `~/.config/omarchy/plugins/onnwee.spool`, and enables the service through Omarchy. It keeps existing preferences, including disabled activity tracking. If `CODEX_THREAD_ID` is set, it records that thread as context for the desktop source; T3 tracking does not need it.
 
-The pet starts with the existing Omarchy shell; no extra autostart entry is needed. Content-versioned QML and JavaScript imports prevent loading older plugin code. If the shell still retains a previous component, use `./install.sh --restart-shell`. That restarts the Omarchy shell and its plugins.
+The pet starts with the Omarchy shell; no extra autostart entry is needed. QML and JavaScript imports are versioned by content, so older plugin code is not loaded. If the shell still holds a previous component, run `./install.sh --restart-shell`, which restarts the Omarchy shell and its plugins.
 
-Backups are kept under `~/.local/state/spool/install-*`. To roll back, disable Spool, restore the plugin files from the chosen backup, rescan plugins, and re-enable it. Restore the backed-up `shell.json` only if you also intend to restore all shell settings from that point.
+Backups are kept under `~/.local/state/spool/install-*`. To roll back, disable Spool, restore the plugin files from a backup, rescan plugins and enable it again. Restore the backed-up `shell.json` only if you want all shell settings from that point back.
+
+### Disable or remove
+
+Disable with `omarchy plugin disable onnwee.spool` and re-enable with `omarchy plugin enable onnwee.spool`. Remove an Omarchy-managed installation with `omarchy plugin remove onnwee.spool`. For a manual installation, disable it first, then delete `~/.config/omarchy/plugins/onnwee.spool`. Backups and preferences are kept separately.
 
 ## Pet controls
 
@@ -48,8 +67,6 @@ Backups are kept under `~/.local/state/spool/install-*`. To roll back, disable S
 - **Right-click:** open the menu for size, eyes, wandering, monitor, activity source, quiet controls, mini mode, and visibility.
 
 The pet starts at the bottom right and hides on fullscreen workspaces by default. Only the sprite, activity bubble, and open menu accept pointer input. The transparent overlay reserves no screen space and requests no keyboard focus. Wandering is off by default.
-
-Preferences live in Spool's entry in `~/.config/omarchy/shell.json`, with a recovery copy in `~/.local/state/spool/preferences.json`. This copy restores preferences after disabling and re-enabling the service.
 
 ## Activity views
 
@@ -113,39 +130,61 @@ Activity sources are `t3`, `desktop`, and `all`. Menu size cycles between 64 and
 
 Disable with `omarchy plugin disable onnwee.spool`; re-enable with `omarchy plugin enable onnwee.spool`. To remove an Omarchy-managed installation, run `omarchy plugin remove onnwee.spool`. For a manual installation, disable first, then remove only `~/.config/omarchy/plugins/onnwee.spool`. Backups and preferences are retained separately.
 
-The source repository is [Gitea](https://git.subcult.tv/subculture-collective/omarchy-plugin-spool). [GitHub](https://github.com/PatrickFanella/omarchy-plugin-spool) is the public distribution mirror used for marketplace submission.
+## Configuration
 
-## Development and releases
+Preferences live in Spool's entry in `~/.config/omarchy/shell.json`, with a recovery copy in `~/.local/state/spool/preferences.json`. This copy restores preferences after disabling and re-enabling the service.
+
+`omarchy-shell spool configure '<json>'` accepts these keys:
+
+| Key | Values |
+| --- | --- |
+| `activitySource` | `t3`, `desktop` or `all`. |
+| `size` | Pet size in pixels, 64 to 256. |
+| `right`, `bottom` | Offset from the bottom-right corner in pixels. |
+| `monitor` | Output name to show the pet on. |
+| `shown` | Show or hide the pet. |
+| `followPointer`, `wander`, `reducedMotion`, `hideFullscreen` | Pet behaviour switches. |
+| `autoActivity` | Turn activity tracking on or off. |
+| `pausePet`, `onlyAttention`, `miniMode`, `activityExpanded`, `recentExpanded` | Tray and quiet-control switches. |
+
+## Build a release archive
 
 ```sh
-make check
 make dist
 ```
 
-Checks require Node.js, `qmllint`, and ShellCheck in addition to Python. Ruff checks run when a working Ruff installation is available. The tests cover adapters, framed transport, task ordering, history, snoozes, and installation in isolated XDG directories. `make dist` builds an allowlisted, reproducible archive and SHA-256 checksum under `dist/`.
+`make dist` runs the checks, then builds a reproducible source archive from an explicit file list, with a SHA-256 checksum, under `dist/`. Extract the archive into a clean directory and run `make check` there before you distribute it.
 
-`Service.qml` owns the UI and lifecycle. `TaskQueue.js` owns ordering and selection. `ActivityStore.js` owns bounded history, recent completions, snoozes, and run normalization. `bridge.py` owns both local activity adapters. `install.sh` installs versioned components and retains backups.
+## Project layout
 
-For a standalone preview, disable the installed plugin and run `quickshell -p .`; stop the preview before re-enabling the service. `shell.qml` uses `ShellRoot` so the preview creates no blank floating window. Release checks and remaining qualification limits are in [docs/RELEASE.md](docs/RELEASE.md).
+| Path | Contents |
+| --- | --- |
+| `manifest.json` | Plugin ID and service entry point. |
+| `Service.qml` | UI and lifecycle. |
+| `TaskQueue.js` | Thread ordering and selection. |
+| `ActivityStore.js` | Bounded history, recent completions, snoozes and run normalization. |
+| `bridge.py` | Both local activity adapters. |
+| `install.sh` | Versioned install with backups. |
+| `shell.qml` | Standalone preview entry. |
+| `scripts/` | `check.sh` and the release packager. |
+| `test_*.py`, `test_*.cjs` | Python and Node tests. |
+
+For a standalone preview, disable the installed plugin and run `quickshell -p .`. Stop the preview before you enable the service again.
+
+## Contributing
+
+Report bugs and request features in [GitHub issues](https://github.com/subculture-collective/omarchy-plugin-spool/issues). Send code as pull requests on GitHub against `main`. CI runs `make check` on every pull request.
+
+```sh
+make check
+```
+
+The checks need Python, Node.js, `qmllint` and ShellCheck. They run the Python and Node tests (adapters, framed transport, task ordering, history, snoozes, and installation in isolated XDG directories), QML lint and ShellCheck, and Omarchy plugin validation and Ruff when those are installed.
 
 ## License and artwork
 
-Code and original Spool artwork are licensed under **AGPL-3.0-only**; see [LICENSE](LICENSE). Bundled provider icons retain their MIT license; see [NOTICE.md](NOTICE.md) and `assets/providers/LICENSE`.
+Code and original Spool artwork are licensed under **AGPL-3.0-only**; see [LICENSE](LICENSE). The bundled provider icons in `assets/providers/` come from OpenCode's icon set and keep their MIT license; see [NOTICE.md](NOTICE.md) and [assets/providers/LICENSE](assets/providers/LICENSE).
 
-The original transparent sprite atlas is 1536 × 2288, with 192 × 208 cells, eight columns, and eleven rows. Its SHA-256 is `500473e396cebfbbe7481b7f63026872149b9dc0e0e0bb89e000d3758b5cb6ee`.
+The original transparent sprite atlas is 1536 × 2288, with 192 × 208 cells, eight columns and eleven rows. Its SHA-256 is `500473e396cebfbbe7481b7f63026872149b9dc0e0e0bb89e000d3758b5cb6ee`.
 
-## About SUBCULT and support
-
-<a href="https://subcult.tv">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="docs/brand/subcult-dark.svg">
-    <img src="docs/brand/subcult-light.svg" alt="SUBCULT" width="240">
-  </picture>
-</a>
-
-Made by [Patrick Fanella](https://patrickfanella.co) as part of
-[SUBCULT](https://subcult.tv). Explore the tools and projects at
-**[subcult.tv](https://subcult.tv)**.
-
-If this plugin is useful to you, **[support SUBCULT on Patreon](https://patreon.com/subcult)**
-to help fund its development and the wider project.
+Made by Patrick Fanella as part of [SUBCULT](https://subcult.tv).
